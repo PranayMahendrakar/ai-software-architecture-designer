@@ -102,7 +102,7 @@ def design_architecture(description: str) -> dict:
 
 def save_output(result: dict, output_dir: str = "output"):
     """Save architecture output to files."""
-    Path(output_dir).mkdir(exist_ok=True)
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
     project_slug = result["project_name"].lower().replace(" ", "-")
 
     # Save JSON report
@@ -113,7 +113,7 @@ def save_output(result: dict, output_dir: str = "output"):
 
     # Save individual Mermaid diagram files
     diagrams_dir = Path(output_dir) / "diagrams"
-    diagrams_dir.mkdir(exist_ok=True)
+    diagrams_dir.mkdir(parents=True, exist_ok=True)
     for name, diagram in result["diagrams"].items():
         mmd_path = diagrams_dir / f"{project_slug}-{name.replace('_', '-')}.mmd"
         with open(mmd_path, "w") as f:
