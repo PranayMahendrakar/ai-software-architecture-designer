@@ -1,0 +1,117 @@
+name: 🏗️ Generate Architecture Examples
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'modules/**'
+      - 'main.py'
+      - '.github/workflows/generate-architecture.yml'
+  workflow_dispatch:
+    inputs:
+      description:
+        description: 'Custom project description to generate architecture for'
+        required: false
+        default: ''
+      example:
+        description: 'Use a built-in example (ecommerce|chat|iot|saas)'
+        required: false
+        default: 'ecommerce'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  generate:
+    name: Generate Architecture Diagrams
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        example: [ecommerce, chat, iot, saas]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run architecture generator
+        run: |
+          python main.py --example ${{ matrix.example }} --output output/${{ matrix.example }}
+
+      - name: Upload architecture artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-${{ matrix.example }}
+          path: output/${{ matrix.example }}/
+          retention-days: 30
+
+  build-pages:
+    name: Build GitHub Pages Site
+    runs-on: ubuntu-latest
+    needs: generate
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Generate all examples
+        run: |
+          for example in ecommerce chat iot saas; do
+            python main.py --example $example --output docs/examples/$example
+          done
+
+      - name: Copy GitHub Pages assets
+        run: |
+          cp docs/index.html docs/index.html || true
+
+      - name: Commit generated examples
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/
+          git diff --staged --quiet || git commit -m "🤖 Auto-regenerate architecture examples [skip ci]"
+          git push
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: build-pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
