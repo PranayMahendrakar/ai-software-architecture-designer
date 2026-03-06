@@ -1,0 +1,22 @@
+# AI Software Architecture Designer - Dependencies
+# Core dependencies (standard library only - no external deps required for basic use)
+
+# Optional: for enhanced NLP parsing
+# spacy>=3.7.0
+# transformers>=4.35.0
+
+# Optional: for diagram rendering to SVG/PNG
+# playwright>=1.40.0
+
+# Optional: for API mode
+# fastapi>=0.104.0
+# uvicorn[standard]>=0.24.0
+# pydantic>=2.4.0
+
+# Development & testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Code quality
+black>=23.9.0
+flake8>=6.1.0
