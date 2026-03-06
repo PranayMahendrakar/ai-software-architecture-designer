@@ -1,0 +1,61 @@
+graph TB
+    subgraph Cloud[Cloud Provider - AWS / GCP / Azure]
+        subgraph VPC[Virtual Private Cloud]
+            subgraph PublicSubnet[Public Subnet]
+                IGW[Internet Gateway]
+                ALB[Application Load Balancer]
+            end
+
+            subgraph K8S[Kubernetes Cluster]
+                subgraph ControlPlane[Control Plane]
+                    API[API Server]
+                    SCHED[Scheduler]
+                    ETCD[etcd]
+                end
+
+                subgraph NodeGroup1[Node Group - App]
+                    POD1[api-gateway Pod x2]
+                    POD2[user-service Pod x3]
+                    POD3[core-service Pod x3]
+                end
+
+                subgraph NodeGroup2[Node Group - Workers]
+                    POD4[payment-service Pod x2]
+                    POD5[notification-service Pod x2]
+                    POD6[websocket-service Pod x2]
+                end
+
+                subgraph Ingress[Ingress / Service Mesh]
+                    ING[Nginx Ingress]
+                    ISTIO[Istio Sidecar]
+                end
+            end
+
+            subgraph DataSubnet[Private Data Subnet]
+                RDS[RDS PostgreSQL Multi-AZ]
+                REDIS[ElastiCache Redis Cluster]
+                MSK[MSK - Managed Kafka]
+            end
+        end
+
+        S3[S3 Object Storage]
+        CF[CloudFront CDN]
+        CW[CloudWatch Monitoring]
+        SM[Secrets Manager]
+    end
+
+    Internet((Internet)) --> CF
+    CF --> ALB
+    ALB --> ING
+    ING --> POD1
+    POD1 --> POD2
+    POD1 --> POD3
+    POD3 --> RDS
+    POD3 --> REDIS
+    POD3 --> MSK
+    POD2 --> RDS
+    MSK --> POD5
+
+    style Cloud fill:#232f3e,stroke:#ff9900
+    style K8S fill:#326ce5,stroke:#fff,color:#fff
+    style DataSubnet fill:#1a1a2e,stroke:#e94560

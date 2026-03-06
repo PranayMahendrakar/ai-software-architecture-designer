@@ -1,0 +1,103 @@
+{
+  "project_name": "commerce",
+  "description": "Build an e-commerce platform where users can browse products, add them to a cart, and complete payments via Stripe. Support real-time order tracking, email notifications, and product search. The system must scale to handle thousands of concurrent users.",
+  "requirements": {
+    "scale": "large",
+    "features": [
+      "Real-time order tracking",
+      "Thousands of concurrent users",
+      "Browse products"
+    ],
+    "entities": [
+      "Stripe",
+      "Support",
+      "Build",
+      "The"
+    ],
+    "integrations": [
+      "Payment",
+      "Stripe",
+      "Email"
+    ],
+    "auth_required": true,
+    "realtime_required": true,
+    "storage_types": [
+      "search"
+    ]
+  },
+  "architecture": {
+    "pattern": "event-driven microservices",
+    "services": [
+      {
+        "name": "api-gateway",
+        "responsibility": "Route requests, rate limiting, auth verification",
+        "port": 8000,
+        "tech": "Nginx / Kong"
+      },
+      {
+        "name": "user-service",
+        "responsibility": "User registration, login, profile management",
+        "port": 8001,
+        "tech": "FastAPI"
+      },
+      {
+        "name": "core-service",
+        "responsibility": "Main business logic for commerce",
+        "port": 8002,
+        "tech": "FastAPI"
+      },
+      {
+        "name": "websocket-service",
+        "responsibility": "Real-time event broadcasting and WebSocket management",
+        "port": 8003,
+        "tech": "FastAPI + WebSockets"
+      },
+      {
+        "name": "payment-service",
+        "responsibility": "Payment processing, invoicing, and transaction management",
+        "port": 8004,
+        "tech": "FastAPI + Stripe SDK"
+      },
+      {
+        "name": "frontend",
+        "responsibility": "User interface and client-side rendering",
+        "port": 3000,
+        "tech": "React / Next.js"
+      }
+    ],
+    "databases": [
+      {
+        "name": "elasticsearch",
+        "type": "Elasticsearch",
+        "used_by": "search-service",
+        "port": 9200
+      }
+    ],
+    "message_broker": "kafka",
+    "deployment": "kubernetes",
+    "monitoring": [
+      "prometheus",
+      "grafana",
+      "elk-stack",
+      "jaeger-tracing"
+    ]
+  },
+  "diagrams": {
+    "system_architecture": "graph TB\n    subgraph Client[\"Client Layer\"]\n        Browser[\"\ud83c\udf10 Web Browser\"]\n        Mobile[\"\ud83d\udcf1 Mobile App\"]\n    end\n\n    subgraph Edge[\"Edge Layer\"]\n        CDN[\"\u2601\ufe0f CDN / CloudFront\"]\n        LB[\"\u2696\ufe0f Load Balancer\"]\n        GW[\"\ud83d\udd00 API Gateway\"]\n    end\n\n    subgraph Services[\"Microservices\"]\n        USER_SERVICE[\"\u2699\ufe0f user-service\"]\n        CORE_SERVICE[\"\u2699\ufe0f core-service\"]\n        WEBSOCKET_SERVICE[\"\u2699\ufe0f websocket-service\"]\n        PAYMENT_SERVICE[\"\u2699\ufe0f payment-service\"]\n    end\n\n    subgraph Data[\"Data Layer\"]\n        ELASTICSEARCH[\"\"\ud83d\udce6 elasticsearch (Elasticsearch)\"]\n        BROKER[\"\ud83d\udce8 Kafka Message Broker\"]\n    end\n\n    Browser --> CDN\n    Mobile --> CDN\n    CDN --> LB\n    LB --> GW\n    GW --> USER_SERVICE\n    GW --> CORE_SERVICE\n    GW --> WEBSOCKET_SERVICE\n    GW --> PAYMENT_SERVICE\n    USER_SERVICE --> ELASTICSEARCH\n    CORE_SERVICE --> ELASTICSEARCH\n    WEBSOCKET_SERVICE --> ELASTICSEARCH\n    PAYMENT_SERVICE --> ELASTICSEARCH\n    CORE_SERVICE --> BROKER\n    BROKER --> NOTIFICATION_SERVICE\n\n    style Client fill:#1a1a2e,stroke:#e94560\n    style Edge fill:#16213e,stroke:#0f3460\n    style Services fill:#0f3460,stroke:#533483\n    style Data fill:#533483,stroke:#e94560",
+    "microservice_layout": "graph LR\n    subgraph External[External Clients]\n        WEB[Web App]\n        MOB[Mobile App]\n    end\n\n    GW[API Gateway :8000]\n\n    subgraph Core Services\n        USER_SERVICE[\"user-service :8001\nFastAPI\"]\n        CORE_SERVICE[\"core-service :8002\nFastAPI\"]\n        WEBSOCKET_SERVICE[\"websocket-service :8003\nFastAPI + WebSockets\"]\n        PAYMENT_SERVICE[\"payment-service :8004\nFastAPI + Stripe SDK\"]\n    end\n\n    subgraph Storage\n        ELASTICSEARCH[\"elasticsearch\nElasticsearch\"]\n    end\n\n    WEB -->|HTTPS| GW\n    MOB -->|HTTPS| GW\n    GW -->|REST/gRPC| USER_SERVICE\n    GW -->|REST/gRPC| CORE_SERVICE\n    GW -->|REST/gRPC| WEBSOCKET_SERVICE\n    GW -->|REST/gRPC| PAYMENT_SERVICE\n    USER_SERVICE --- ELASTICSEARCH\n    CORE_SERVICE --- ELASTICSEARCH\n    PAYMENT_SERVICE --- ELASTICSEARCH\n\n    BROKER[\"KAFKA\nMessage Broker\"]\n    CORE_SERVICE -->|publish| BROKER\n    BROKER -->|subscribe| NOTIFICATION_SERVICE",
+    "database_schema": "erDiagram\n    USERS {\n        UUID id PK\n        VARCHAR(255) email\n        VARCHAR(255) password_hash\n        VARCHAR(100) full_name\n        VARCHAR(50) role\n        BOOLEAN is_active\n        TIMESTAMP created_at\n        TIMESTAMP updated_at\n    }\n\n    SESSIONS {\n        UUID id PK\n        UUID user_id FK\n        VARCHAR(512) token_hash\n        TIMESTAMP expires_at\n        INET ip_address\n        TIMESTAMP created_at\n    }\n\n    AUDIT_LOGS {\n        BIGSERIAL id PK\n        VARCHAR(100) entity_type\n        UUID entity_id\n        VARCHAR(50) action\n        UUID actor_id FK\n        JSONB metadata\n        TIMESTAMP created_at\n    }\n\n    PRODUCTS {\n        UUID id PK\n        VARCHAR(255) name\n        TEXT description\n        DECIMAL(10,2) price\n        INTEGER stock_quantity\n        UUID category_id FK\n        BOOLEAN is_active\n        TIMESTAMP created_at\n    }\n\n    ORDERS {\n        UUID id PK\n        UUID user_id FK\n        VARCHAR(50) status\n        DECIMAL(10,2) total_amount\n        VARCHAR(255) payment_intent_id\n        JSONB shipping_address\n        TIMESTAMP created_at\n        TIMESTAMP updated_at\n    }\n\n    SESSIONS }o--||  USERS : \"belongs to\"\n    ORDERS }o--||  USERS : \"belongs to\"\n    AUDIT_LOGS }o--||  USERS : \"belongs to\"",
+    "deployment_strategy": "graph TB\n    subgraph Cloud[Cloud Provider - AWS / GCP / Azure]\n        subgraph VPC[Virtual Private Cloud]\n            subgraph PublicSubnet[Public Subnet]\n                IGW[Internet Gateway]\n                ALB[Application Load Balancer]\n            end\n\n            subgraph K8S[Kubernetes Cluster]\n                subgraph ControlPlane[Control Plane]\n                    API[API Server]\n                    SCHED[Scheduler]\n                    ETCD[etcd]\n                end\n\n                subgraph NodeGroup1[Node Group - App]\n                    POD1[api-gateway Pod x2]\n                    POD2[user-service Pod x3]\n                    POD3[core-service Pod x3]\n                end\n\n                subgraph NodeGroup2[Node Group - Workers]\n                    POD4[payment-service Pod x2]\n                    POD5[notification-service Pod x2]\n                    POD6[websocket-service Pod x2]\n                end\n\n                subgraph Ingress[Ingress / Service Mesh]\n                    ING[Nginx Ingress]\n                    ISTIO[Istio Sidecar]\n                end\n            end\n\n            subgraph DataSubnet[Private Data Subnet]\n                RDS[RDS PostgreSQL Multi-AZ]\n                REDIS[ElastiCache Redis Cluster]\n                MSK[MSK - Managed Kafka]\n            end\n        end\n\n        S3[S3 Object Storage]\n        CF[CloudFront CDN]\n        CW[CloudWatch Monitoring]\n        SM[Secrets Manager]\n    end\n\n    Internet((Internet)) --> CF\n    CF --> ALB\n    ALB --> ING\n    ING --> POD1\n    POD1 --> POD2\n    POD1 --> POD3\n    POD3 --> RDS\n    POD3 --> REDIS\n    POD3 --> MSK\n    POD2 --> RDS\n    MSK --> POD5\n\n    style Cloud fill:#232f3e,stroke:#ff9900\n    style K8S fill:#326ce5,stroke:#fff,color:#fff\n    style DataSubnet fill:#1a1a2e,stroke:#e94560"
+  },
+  "components": {
+    "service_count": 6,
+    "db_tables": [
+      "users",
+      "sessions",
+      "audit_logs",
+      "products",
+      "orders"
+    ],
+    "docker_compose_snippet": "version: '3.9'\nservices:\n  api-gateway:\n    build: ./api-gateway\n    ports:\n      - \"8000:8000\"\n  user-service:\n    build: ./user-service\n    ports:\n      - \"8001:8001\"\n  core-service:\n    build: ./core-service\n    ports:\n      - \"8002:8002\"\n",
+    "kubernetes_snippet": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: core-service\nspec:\n  replicas: 3\n  selector:\n    matchLabels:\n      app: core-service\n  template:\n    metadata:\n      labels:\n        app: core-service\n    spec:\n      containers:\n      - name: core-service\n        image: core-service:latest\n        ports:\n        - containerPort: 8002\n        envFrom:\n        - secretRef:\n            name: core-service-secrets"
+  }
+}

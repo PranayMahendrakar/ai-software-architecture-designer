@@ -1,0 +1,56 @@
+erDiagram
+    USERS {
+        UUID id PK
+        VARCHAR(255) email
+        VARCHAR(255) password_hash
+        VARCHAR(100) full_name
+        VARCHAR(50) role
+        BOOLEAN is_active
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    SESSIONS {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR(512) token_hash
+        TIMESTAMP expires_at
+        INET ip_address
+        TIMESTAMP created_at
+    }
+
+    AUDIT_LOGS {
+        BIGSERIAL id PK
+        VARCHAR(100) entity_type
+        UUID entity_id
+        VARCHAR(50) action
+        UUID actor_id FK
+        JSONB metadata
+        TIMESTAMP created_at
+    }
+
+    PRODUCTS {
+        UUID id PK
+        VARCHAR(255) name
+        TEXT description
+        DECIMAL(10,2) price
+        INTEGER stock_quantity
+        UUID category_id FK
+        BOOLEAN is_active
+        TIMESTAMP created_at
+    }
+
+    ORDERS {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR(50) status
+        DECIMAL(10,2) total_amount
+        VARCHAR(255) payment_intent_id
+        JSONB shipping_address
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    SESSIONS }o--||  USERS : "belongs to"
+    ORDERS }o--||  USERS : "belongs to"
+    AUDIT_LOGS }o--||  USERS : "belongs to"

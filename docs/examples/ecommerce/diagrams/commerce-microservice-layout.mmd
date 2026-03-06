@@ -1,0 +1,38 @@
+graph LR
+    subgraph External[External Clients]
+        WEB[Web App]
+        MOB[Mobile App]
+    end
+
+    GW[API Gateway :8000]
+
+    subgraph Core Services
+        USER_SERVICE["user-service :8001
+FastAPI"]
+        CORE_SERVICE["core-service :8002
+FastAPI"]
+        WEBSOCKET_SERVICE["websocket-service :8003
+FastAPI + WebSockets"]
+        PAYMENT_SERVICE["payment-service :8004
+FastAPI + Stripe SDK"]
+    end
+
+    subgraph Storage
+        ELASTICSEARCH["elasticsearch
+Elasticsearch"]
+    end
+
+    WEB -->|HTTPS| GW
+    MOB -->|HTTPS| GW
+    GW -->|REST/gRPC| USER_SERVICE
+    GW -->|REST/gRPC| CORE_SERVICE
+    GW -->|REST/gRPC| WEBSOCKET_SERVICE
+    GW -->|REST/gRPC| PAYMENT_SERVICE
+    USER_SERVICE --- ELASTICSEARCH
+    CORE_SERVICE --- ELASTICSEARCH
+    PAYMENT_SERVICE --- ELASTICSEARCH
+
+    BROKER["KAFKA
+Message Broker"]
+    CORE_SERVICE -->|publish| BROKER
+    BROKER -->|subscribe| NOTIFICATION_SERVICE

@@ -1,0 +1,44 @@
+graph TB
+    subgraph Client["Client Layer"]
+        Browser["🌐 Web Browser"]
+        Mobile["📱 Mobile App"]
+    end
+
+    subgraph Edge["Edge Layer"]
+        CDN["☁️ CDN / CloudFront"]
+        LB["⚖️ Load Balancer"]
+        GW["🔀 API Gateway"]
+    end
+
+    subgraph Services["Microservices"]
+        USER_SERVICE["⚙️ user-service"]
+        CORE_SERVICE["⚙️ core-service"]
+        WEBSOCKET_SERVICE["⚙️ websocket-service"]
+    end
+
+    subgraph Data["Data Layer"]
+        ELASTICSEARCH[""📦 elasticsearch (Elasticsearch)"]
+        OBJECT_STORE[""📦 object-store (S3 / MinIO)"]
+        BROKER["📨 Kafka Message Broker"]
+    end
+
+    Browser --> CDN
+    Mobile --> CDN
+    CDN --> LB
+    LB --> GW
+    GW --> USER_SERVICE
+    GW --> CORE_SERVICE
+    GW --> WEBSOCKET_SERVICE
+    USER_SERVICE --> ELASTICSEARCH
+    USER_SERVICE --> OBJECT_STORE
+    CORE_SERVICE --> ELASTICSEARCH
+    CORE_SERVICE --> OBJECT_STORE
+    WEBSOCKET_SERVICE --> ELASTICSEARCH
+    WEBSOCKET_SERVICE --> OBJECT_STORE
+    CORE_SERVICE --> BROKER
+    BROKER --> NOTIFICATION_SERVICE
+
+    style Client fill:#1a1a2e,stroke:#e94560
+    style Edge fill:#16213e,stroke:#0f3460
+    style Services fill:#0f3460,stroke:#533483
+    style Data fill:#533483,stroke:#e94560

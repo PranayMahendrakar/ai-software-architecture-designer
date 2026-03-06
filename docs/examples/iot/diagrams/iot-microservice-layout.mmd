@@ -1,0 +1,38 @@
+graph LR
+    subgraph External[External Clients]
+        WEB[Web App]
+        MOB[Mobile App]
+    end
+
+    GW[API Gateway :8000]
+
+    subgraph Core Services
+        USER_SERVICE["user-service :8001
+FastAPI"]
+        CORE_SERVICE["core-service :8002
+FastAPI"]
+        WEBSOCKET_SERVICE["websocket-service :8003
+FastAPI + WebSockets"]
+    end
+
+    subgraph Storage
+        POSTGRES_DB["postgres-db
+PostgreSQL"]
+        REDIS_CACHE["redis-cache
+Redis"]
+    end
+
+    WEB -->|HTTPS| GW
+    MOB -->|HTTPS| GW
+    GW -->|REST/gRPC| USER_SERVICE
+    GW -->|REST/gRPC| CORE_SERVICE
+    GW -->|REST/gRPC| WEBSOCKET_SERVICE
+    USER_SERVICE --- POSTGRES_DB
+    USER_SERVICE --- REDIS_CACHE
+    CORE_SERVICE --- POSTGRES_DB
+    CORE_SERVICE --- REDIS_CACHE
+
+    BROKER["KAFKA
+Message Broker"]
+    CORE_SERVICE -->|publish| BROKER
+    BROKER -->|subscribe| NOTIFICATION_SERVICE

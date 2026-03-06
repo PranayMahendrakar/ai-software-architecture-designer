@@ -1,0 +1,38 @@
+graph LR
+    subgraph External[External Clients]
+        WEB[Web App]
+        MOB[Mobile App]
+    end
+
+    GW[API Gateway :8000]
+
+    subgraph Core Services
+        USER_SERVICE["user-service :8001
+FastAPI"]
+        CORE_SERVICE["core-service :8002
+FastAPI"]
+        WEBSOCKET_SERVICE["websocket-service :8003
+FastAPI + WebSockets"]
+    end
+
+    subgraph Storage
+        ELASTICSEARCH["elasticsearch
+Elasticsearch"]
+        OBJECT_STORE["object-store
+S3 / MinIO"]
+    end
+
+    WEB -->|HTTPS| GW
+    MOB -->|HTTPS| GW
+    GW -->|REST/gRPC| USER_SERVICE
+    GW -->|REST/gRPC| CORE_SERVICE
+    GW -->|REST/gRPC| WEBSOCKET_SERVICE
+    USER_SERVICE --- ELASTICSEARCH
+    USER_SERVICE --- OBJECT_STORE
+    CORE_SERVICE --- ELASTICSEARCH
+    CORE_SERVICE --- OBJECT_STORE
+
+    BROKER["KAFKA
+Message Broker"]
+    CORE_SERVICE -->|publish| BROKER
+    BROKER -->|subscribe| NOTIFICATION_SERVICE
