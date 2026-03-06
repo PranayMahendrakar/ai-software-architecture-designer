@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Software Architecture Designer</title>
+
+  <!-- Mermaid.js -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-secondary: #8b949e;
+      --accent: #58a6ff;
+      --accent2: #3fb950;
+      --accent3: #f78166;
+      --accent4: #d2a8ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    header p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .badge {
+      background: var(--accent);
+      color: #0d1117;
+      border-radius: 999px;
+      padding: 0.2rem 0.7rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .intro {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .intro h2 { color: var(--accent4); margin-bottom: 0.5rem; }
+    .intro p { color: var(--text-secondary); margin-bottom: 0.5rem; }
+
+    .pipeline {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .step {
+      background: #21262d;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .arrow { color: var(--text-secondary); font-size: 1rem; }
+
+    .tabs-nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.75rem 1.5rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .example-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .example-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.1s;
+    }
+
+    .example-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .example-card.selected { border-color: var(--accent2); }
+
+    .example-card h3 { margin-bottom: 0.5rem; font-size: 1rem; }
+    .example-card p { color: var(--text-secondary); font-size: 0.85rem; }
+
+    .tag {
+      display: inline-block;
+      background: #21262d;
+      border-radius: 4px;
+      padding: 0.15rem 0.5rem;
+      font-size: 0.75rem;
+      margin: 0.25rem 0.2rem 0 0;
+      color: var(--text-secondary);
+    }
+
+    .diagram-section {
+      margin-bottom: 3rem;
+    }
+
+    .diagram-section h3 {
+      font-size: 1rem;
+      color: var(--accent4);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .diagram-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+
+    .diagram-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .dtab {
+      background: #21262d;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0.4rem 1rem;
+      transition: all 0.2s;
+    }
+
+    .dtab:hover { border-color: var(--accent); color: var(--accent); }
+    .dtab.active { background: var(--accent); color: #0d1117; border-color: var(--accent); font-weight: 600; }
+
+    .dtab-content { display: none; }
+    .dtab-content.active { display: block; }
+
+    .generator-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .generator-section h3 { margin-bottom: 1rem; color: var(--accent2); }
+
+    textarea {
+      width: 100%;
+      height: 100px;
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+      padding: 0.75rem;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    textarea:focus { outline: none; border-color: var(--accent); }
+
+    .btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #0d1117;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.6rem 1.5rem;
+      margin-top: 0.75rem;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover { opacity: 0.8; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+
+    .info-card h4 { color: var(--text-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .info-card p { font-size: 1.1rem; font-weight: 600; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      margin-top: 4rem;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🏗️ AI Software Architecture Designer</h1>
+    <p>Converts natural language project descriptions into full software architectures with Mermaid diagrams</p>
+  </div>
+  <span class="badge">v1.0</span>
+</header>
+
+<main>
+
+  <!-- Intro / Pipeline -->
+  <div class="intro">
+    <h2>How It Works</h2>
+    <p>Describe your project in plain English and get a complete architecture specification instantly.</p>
+    <div class="pipeline">
+      <div class="step">📝 Natural Language Input</div>
+      <span class="arrow">→</span>
+      <div class="step">🔍 requirement_parser</div>
+      <span class="arrow">→</span>
+      <div class="step">🏗️ architecture_planner</div>
+      <span class="arrow">→</span>
+      <div class="step">⚙️ component_generator</div>
+      <span class="arrow">→</span>
+      <div class="step">📊 diagram_builder</div>
+      <span class="arrow">→</span>
+      <div class="step">✅ Full Architecture</div>
+    </div>
+  </div>
+
+  <!-- Main Tabs -->
+  <nav class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab('examples', this)">📦 Architecture Examples</button>
+    <button class="tab-btn" onclick="switchTab('diagrams', this)">📊 Mermaid Diagrams</button>
+    <button class="tab-btn" onclick="switchTab('modules', this)">🔧 Modules</button>
+    <button class="tab-btn" onclick="switchTab('generator', this)">⚡ Try Generator</button>
+  </nav>
+
+  <!-- Tab: Examples -->
+  <div id="tab-examples" class="tab-content active">
+    <div class="example-grid">
+      <div class="example-card selected" onclick="selectExample('ecommerce', this)">
+        <h3>🛒 E-Commerce Platform</h3>
+        <p>Full e-commerce with products, cart, payments, real-time order tracking, and email notifications.</p>
+        <span class="tag">Microservices</span>
+        <span class="tag">Stripe</span>
+        <span class="tag">WebSockets</span>
+        <span class="tag">Kubernetes</span>
+      </div>
+      <div class="example-card" onclick="selectExample('chat', this)">
+        <h3>💬 Real-Time Chat App</h3>
+        <p>Multi-room chat with persistent history, file sharing, OAuth login, and full-text search.</p>
+        <span class="tag">WebSockets</span>
+        <span class="tag">OAuth</span>
+        <span class="tag">Redis</span>
+        <span class="tag">Elasticsearch</span>
+      </div>
+      <div class="example-card" onclick="selectExample('iot', this)">
+        <h3>🌐 IoT Data Platform</h3>
+        <p>Enterprise IoT: ingests sensor data, time-series metrics, alert engine, and live dashboards.</p>
+        <span class="tag">Event-Driven</span>
+        <span class="tag">Kafka</span>
+        <span class="tag">TimescaleDB</span>
+        <span class="tag">Distributed</span>
+      </div>
+      <div class="example-card" onclick="selectExample('saas', this)">
+        <h3>📋 SaaS Project Management</h3>
+        <p>Team collaboration with tasks, milestones, Slack integration, SSO, and webhooks.</p>
+        <span class="tag">Enterprise</span>
+        <span class="tag">SSO</span>
+        <span class="tag">Slack</span>
+        <span class="tag">Multi-tenant</span>
+      </div>
+    </div>
+
+    <div id="example-info" class="info-grid">
+      <div class="info-card"><h4>Architecture Pattern</h4><p id="info-pattern">Microservices</p></div>
+      <div class="info-card"><h4>Scale</h4><p id="info-scale">Medium</p></div>
+      <div class="info-card"><h4>Microservices</h4><p id="info-services">6 services</p></div>
+      <div class="info-card"><h4>Databases</h4><p id="info-dbs">PostgreSQL + Redis</p></div>
+      <div class="info-card"><h4>Deployment</h4><p id="info-deploy">Kubernetes</p></div>
+      <div class="info-card"><h4>Message Broker</h4><p id="info-broker">RabbitMQ</p></div>
+    </div>
+  </div>
+
+  <!-- Tab: Diagrams -->
+  <div id="tab-diagrams" class="tab-content">
+    <div class="diagram-tabs">
+      <button class="dtab active" onclick="switchDiagram('arch', this)">🏗️ System Architecture</button>
+      <button class="dtab" onclick="switchDiagram('micro', this)">🔀 Microservice Layout</button>
+      <button class="dtab" onclick="switchDiagram('db', this)">🗄️ Database Schema</button>
+      <button class="dtab" onclick="switchDiagram('deploy', this)">🚀 Deployment Strategy</button>
+    </div>
+
+    <!-- System Architecture -->
+    <div id="dtab-arch" class="dtab-content active diagram-section">
+      <h3>🏗️ System Architecture — E-Commerce Platform</h3>
+      <div class="diagram-box">
+        <div class="mermaid">
+graph TB
+    subgraph Client["Client Layer"]
+        Browser["🌐 Web Browser"]
+        Mobile["📱 Mobile App"]
+    end
+
+    subgraph Edge["Edge Layer"]
+        CDN["☁️ CDN / CloudFront"]
+        LB["⚖️ Load Balancer"]
+        GW["🔀 API Gateway :8000"]
+    end
+
+    subgraph Services["Microservices"]
+        US["⚙️ user-service :8001"]
+        CS["⚙️ core-service :8002"]
+        WS["⚙️ websocket-service :8003"]
+        PS["⚙️ payment-service :8004"]
+        NS["⚙️ notification-service :8005"]
+    end
+
+    subgraph Data["Data Layer"]
+        PG[("🗄️ PostgreSQL :5432")]
+        RD[("⚡ Redis :6379")]
+        MQ["📨 RabbitMQ Broker"]
+    end
+
+    Browser --> CDN
+    Mobile --> CDN
+    CDN --> LB
+    LB --> GW
+    GW --> US
+    GW --> CS
+    GW --> WS
+    GW --> PS
+    US --> PG
+    US --> RD
+    CS --> PG
+    CS --> RD
+    PS --> PG
+    CS --> MQ
+    MQ --> NS
+
+    style Client fill:#1a1a2e,stroke:#e94560
+    style Edge fill:#16213e,stroke:#0f3460
+    style Services fill:#0f3460,stroke:#533483
+    style Data fill:#533483,stroke:#e94560
+        </div>
+      </div>
+    </div>
+
+    <!-- Microservice Layout -->
+    <div id="dtab-micro" class="dtab-content diagram-section">
+      <h3>🔀 Microservice Interaction Layout</h3>
+      <div class="diagram-box">
+        <div class="mermaid">
+graph LR
+    subgraph External["External Clients"]
+        WEB["Web App :3000"]
+        MOB["Mobile App"]
+    end
+
+    GW["API Gateway :8000\nNginx / Kong"]
+
+    subgraph CoreServices["Core Services"]
+        US["user-service :8001\nFastAPI + JWT"]
+        CS["core-service :8002\nFastAPI"]
+        WS["websocket-service :8003\nFastAPI + WS"]
+        PS["payment-service :8004\nFastAPI + Stripe"]
+        NS["notification-service :8005\nFastAPI + SendGrid"]
+    end
+
+    subgraph Storage["Storage"]
+        PG[("PostgreSQL\nRelational DB")]
+        RD[("Redis\nCache + Sessions")]
+        MQ["RabbitMQ\nMessage Broker"]
+    end
+
+    WEB -->|HTTPS| GW
+    MOB -->|HTTPS| GW
+    GW -->|REST| US
+    GW -->|REST| CS
+    GW -->|WSS| WS
+    GW -->|REST| PS
+    US --- PG
+    US --- RD
+    CS --- PG
+    CS --- RD
+    PS --- PG
+    CS -->|publish| MQ
+    MQ -->|subscribe| NS
+        </div>
+      </div>
+    </div>
+
+    <!-- DB Schema -->
+    <div id="dtab-db" class="dtab-content diagram-section">
+      <h3>🗄️ Database Schema (ER Diagram)</h3>
+      <div class="diagram-box">
+        <div class="mermaid">
+erDiagram
+    USERS {
+        UUID id PK
+        VARCHAR email UK
+        VARCHAR password_hash
+        VARCHAR full_name
+        VARCHAR role
+        BOOLEAN is_active
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    SESSIONS {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR token_hash UK
+        TIMESTAMP expires_at
+        INET ip_address
+        TIMESTAMP created_at
+    }
+
+    PRODUCTS {
+        UUID id PK
+        VARCHAR name
+        TEXT description
+        DECIMAL price
+        INTEGER stock_quantity
+        UUID category_id FK
+        BOOLEAN is_active
+        TIMESTAMP created_at
+    }
+
+    ORDERS {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR status
+        DECIMAL total_amount
+        VARCHAR payment_intent_id
+        JSONB shipping_address
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    AUDIT_LOGS {
+        BIGSERIAL id PK
+        VARCHAR entity_type
+        UUID entity_id
+        VARCHAR action
+        UUID actor_id FK
+        JSONB metadata
+        TIMESTAMP created_at
+    }
+
+    USERS ||--o{ SESSIONS : "has"
+    USERS ||--o{ ORDERS : "places"
+    USERS ||--o{ AUDIT_LOGS : "generates"
+    ORDERS }o--|| PRODUCTS : "contains"
+        </div>
+      </div>
+    </div>
+
+    <!-- Deployment -->
+    <div id="dtab-deploy" class="dtab-content diagram-section">
+      <h3>🚀 Kubernetes Deployment Strategy</h3>
+      <div class="diagram-box">
+        <div class="mermaid">
+graph TB
+    subgraph Cloud["☁️ Cloud Provider - AWS / GCP / Azure"]
+        subgraph VPC["Virtual Private Cloud"]
+            subgraph PublicSubnet["Public Subnet"]
+                IGW["Internet Gateway"]
+                ALB["Application Load Balancer"]
+            end
+
+            subgraph K8S["☸️ Kubernetes Cluster"]
+                subgraph NodeGroup1["Node Group - App Pods"]
+                    POD1["api-gateway x2"]
+                    POD2["user-service x3"]
+                    POD3["core-service x3"]
+                end
+                subgraph NodeGroup2["Node Group - Worker Pods"]
+                    POD4["payment-service x2"]
+                    POD5["notification-service x2"]
+                    POD6["websocket-service x2"]
+                end
+                ING["Nginx Ingress Controller"]
+            end
+
+            subgraph DataSubnet["Private Data Subnet"]
+                RDS["RDS PostgreSQL Multi-AZ"]
+                REDIS["ElastiCache Redis Cluster"]
+                MSK["MSK - Managed RabbitMQ"]
+            end
+        end
+
+        CF["CloudFront CDN"]
+        CW["CloudWatch Monitoring"]
+        SM["Secrets Manager"]
+    end
+
+    Internet(("🌐 Internet")) --> CF
+    CF --> ALB
+    ALB --> ING
+    ING --> POD1
+    POD1 --> POD2
+    POD1 --> POD3
+    POD3 --> RDS
+    POD3 --> REDIS
+    POD3 --> MSK
+    POD2 --> RDS
+    MSK --> POD5
+
+    style Cloud fill:#232f3e,stroke:#ff9900
+    style K8S fill:#326ce5,stroke:#fff,color:#fff
+    style DataSubnet fill:#1a1a2e,stroke:#e94560
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Modules -->
+  <div id="tab-modules" class="tab-content">
+    <div class="example-grid">
+      <div class="info-card">
+        <h4>🔍 requirement_parser.py</h4>
+        <p style="margin-top:0.5rem; color:var(--text)">Parses natural language descriptions. Extracts: features, entities, scale, integrations, auth/realtime needs, and storage types.</p>
+      </div>
+      <div class="info-card">
+        <h4>🏗️ architecture_planner.py</h4>
+        <p style="margin-top:0.5rem; color:var(--text)">Plans the overall architecture. Selects: pattern (monolith/microservices/event-driven), services, databases, message broker, and deployment target.</p>
+      </div>
+      <div class="info-card">
+        <h4>⚙️ component_generator.py</h4>
+        <p style="margin-top:0.5rem; color:var(--text)">Generates detailed specs: DB tables with columns/indexes, service endpoints, environment variables, and Docker/K8s snippets.</p>
+      </div>
+      <div class="info-card">
+        <h4>📊 diagram_builder.py</h4>
+        <p style="margin-top:0.5rem; color:var(--text)">Outputs 4 Mermaid diagrams: system architecture, microservice layout, ER database schema, and deployment strategy.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Generator -->
+  <div id="tab-generator" class="tab-content">
+    <div class="generator-section">
+      <h3>⚡ Interactive Architecture Generator</h3>
+      <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.9rem;">
+        Enter a project description below to see how the AI Architecture Designer would parse and plan it.
+        To generate actual Mermaid diagrams, run the Python project locally or trigger the GitHub Actions workflow.
+      </p>
+      <textarea id="project-desc" placeholder="e.g. Build a ride-sharing app like Uber where users can request rides, drivers can accept them, with real-time location tracking and payment processing via Stripe..."></textarea>
+      <button class="btn" onclick="analyzeDescription()">🔍 Analyze Description</button>
+    </div>
+    <div id="analysis-output" style="display:none;">
+      <div class="info-grid" id="analysis-info"></div>
+    </div>
+    <div class="generator-section" style="margin-top:1rem;">
+      <h3>🚀 Run Locally</h3>
+      <pre style="background:#0d1117; border:1px solid var(--border); border-radius:8px; padding:1rem; font-size:0.85rem; overflow-x:auto; color:#3fb950;">
+# Clone and run
+git clone https://github.com/PranayMahendrakar/ai-software-architecture-designer.git
+cd ai-software-architecture-designer
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run with a built-in example
+python main.py --example ecommerce
+
+# Run with your own description
+python main.py --description "Build a food delivery app like DoorDash"
+
+# Interactive mode
+python main.py --interactive
+      </pre>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>
+    <strong>AI Software Architecture Designer</strong> &nbsp;|&nbsp;
+    Built with Python &amp; Mermaid.js &nbsp;|&nbsp;
+    <a href="https://github.com/PranayMahendrakar/ai-software-architecture-designer" target="_blank">View on GitHub</a>
+    &nbsp;|&nbsp; Auto-deployed by GitHub Actions
+  </p>
+</footer>
+
+<script>
+  // Initialize Mermaid
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      background: '#161b22',
+      primaryColor: '#58a6ff',
+      primaryTextColor: '#c9d1d9',
+      primaryBorderColor: '#30363d',
+      lineColor: '#8b949e',
+      secondaryColor: '#21262d',
+      tertiaryColor: '#0d1117',
+    }
+  });
+
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+    if (id === 'diagrams') mermaid.run();
+  }
+
+  function switchDiagram(id, btn) {
+    document.querySelectorAll('.dtab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.dtab').forEach(b => b.classList.remove('active'));
+    document.getElementById('dtab-' + id).classList.add('active');
+    btn.classList.add('active');
+    mermaid.run();
+  }
+
+  const exampleData = {
+    ecommerce: { pattern: 'Microservices', scale: 'Medium', services: '6 services', dbs: 'PostgreSQL + Redis', deploy: 'Kubernetes', broker: 'RabbitMQ' },
+    chat: { pattern: 'Microservices', scale: 'Medium', services: '5 services', dbs: 'PostgreSQL + Redis + ES', deploy: 'Kubernetes', broker: 'RabbitMQ' },
+    iot: { pattern: 'Event-Driven Microservices', scale: 'Large', services: '7 services', dbs: 'TimescaleDB + Redis', deploy: 'Kubernetes', broker: 'Kafka' },
+    saas: { pattern: 'Microservices', scale: 'Large', services: '6 services', dbs: 'PostgreSQL + Redis', deploy: 'Kubernetes', broker: 'Kafka' },
+  };
+
+  function selectExample(name, el) {
+    document.querySelectorAll('.example-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    const d = exampleData[name];
+    document.getElementById('info-pattern').textContent = d.pattern;
+    document.getElementById('info-scale').textContent = d.scale;
+    document.getElementById('info-services').textContent = d.services;
+    document.getElementById('info-dbs').textContent = d.dbs;
+    document.getElementById('info-deploy').textContent = d.deploy;
+    document.getElementById('info-broker').textContent = d.broker;
+  }
+
+  function analyzeDescription() {
+    const desc = document.getElementById('project-desc').value.trim();
+    if (!desc) return;
+    const lower = desc.toLowerCase();
+
+    const scale = lower.includes('enterprise') || lower.includes('million') || lower.includes('global') ? 'Large'
+                : lower.includes('small') || lower.includes('simple') || lower.includes('mvp') ? 'Small'
+                : 'Medium';
+    const hasAuth = /auth|login|user|oauth|jwt/.test(lower);
+    const hasRealtime = /real.?time|websocket|live|streaming/.test(lower);
+    const hasPayment = /payment|stripe|billing/.test(lower);
+    const broker = scale === 'Large' || hasRealtime ? (scale === 'Large' ? 'Kafka' : 'RabbitMQ') : 'None';
+    const services = 2 + (hasAuth ? 1 : 0) + (hasRealtime ? 1 : 0) + (hasPayment ? 1 : 0);
+
+    const out = document.getElementById('analysis-output');
+    const info = document.getElementById('analysis-info');
+    info.innerHTML = [
+      ['Detected Scale', scale],
+      ['Auth Required', hasAuth ? 'Yes' : 'No'],
+      ['Real-time Required', hasRealtime ? 'Yes' : 'No'],
+      ['Payment Integration', hasPayment ? 'Yes (Stripe)' : 'No'],
+      ['Est. Services', services + ' microservices'],
+      ['Message Broker', broker],
+    ].map(([k, v]) => `<div class="info-card"><h4>${k}</h4><p>${v}</p></div>`).join('');
+    out.style.display = 'block';
+  }
+</script>
+
+</body>
+</html>
